@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def state_calculator(arr, low, mid):
     state_arr = []
     for i in arr:
@@ -26,11 +23,3 @@ def symbol_calculator(arr, a, b, c):
             output.append("D")
     return output
 
-
-def export_csv(data, filename, output_path):
-    d = {}
-    for i in data:
-        d[i] = i
-    df = pd.DataFrame(data=d)
-    df.to_csv(f"{output_path}//{filename}")
-    print("Csv file created")
