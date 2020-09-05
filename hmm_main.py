@@ -5,8 +5,8 @@ from hmmlearn import hmm
 import math
 from utils import state_calculator, symbol_calculator
 
-input_path = "F://hmm-master//hmm-master//data//observation//"
-files = os.listdir(input_path)
+obs_path = "D://project//hmm//data//observation//"
+files = os.listdir(obs_path)
 state_path = "F://hmm-master//hmm-master//data//state//"
 
 for filename in files:
@@ -14,7 +14,7 @@ for filename in files:
     df2 = pd.read_csv(state_path + str(filename)).dropna()
     df = df2[:18]
     # print(df)
-    df3 = pd.read_csv(input_path + str(filename)).dropna()
+    df3 = pd.read_csv(obs_path + str(filename)).dropna()
     df4 = df3[:24]
     # print(df4)
     print("\nState calculation.. for " + str(filename))
