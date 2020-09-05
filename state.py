@@ -20,7 +20,7 @@ for filename in files:
     RETWEET_MID_RANGE = 1.75
 
     TWEET_LOW_RANGE = 0.7
-    TWEET_MID_RANGE = 0.25
+    TWEET_MID_RANGE = 1.25
 
     like = df["sd_like"]
     retweet = df["sd_retweet"]

@@ -13,7 +13,7 @@ model.startprob_ = np.ones(27) / 27
 model.transmat_ = STATE_MATRIX
 model.emissionprob_ = OBS_MATRIX
 
-logprob, seq = model.decode(np.array([[25, 15, 11, 28, 25, 7]]).transpose())
+logprob, seq = model.decode(np.array([[25, 15, 11, 28, 25, 7,25,36,45,12,10,0,56,2,0,0,0,0,0,0,0,]]).transpose())
 
 print("math.exp(logprob) = ", math.exp(logprob))
 print("seq = ", seq)
