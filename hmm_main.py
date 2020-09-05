@@ -7,16 +7,15 @@ from utils import state_calculator, symbol_calculator
 
 obs_path = "D://project//hmm//data//observation//"
 files = os.listdir(obs_path)
-state_path = "F://hmm-master//hmm-master//data//state//"
+state_path = "D://project//hmm//data//state//"
+
+output_path = "D://project//hmm//output//"
 
 for filename in files:
-
+    # State : creating state transition matrix
     df2 = pd.read_csv(state_path + str(filename)).dropna()
     df = df2[:18]
-    # print(df)
-    df3 = pd.read_csv(obs_path + str(filename)).dropna()
-    df4 = df3[:24]
-    # print(df4)
+
     print("\nState calculation.. for " + str(filename))
     LIKE_LOW_RANGE = 100
     LIKE_MID_RANGE = 1000
@@ -48,7 +47,7 @@ for filename in files:
     for i in comparison_arr:
         if i in STATE:
             state_arr.append(STATE.index(i))
-    # print(state_arr)
+
     trans_dict = {}
     for i in range(len(state_arr) - 1):
         s = state_arr[i], state_arr[i + 1]
@@ -56,22 +55,26 @@ for filename in files:
             trans_dict[s] += 1
         else:
             trans_dict[s] = 1
-    # print(trans_dict)
+
     a = np.zeros((27, 27))
     for key in trans_dict.keys():
         a[key] = trans_dict[key]
-    # print(a[20])
+
     for i in range(27):
         s = sum(a[i]) + 27
         for j in range(27):
             a[i, j] = (a[i, j] + 1)
             a[i, j] = a[i, j] / s
 
-    state_matrix=a
+    state_matrix = a
     data = pd.DataFrame(data=state_matrix)
-    data.to_csv("F://hmm-master//hmm-master//output//state//"+str(filename)+"_state.csv")
-    print("State trasition matrix generated succesfully\n")
-    print("\nObservation table calculation .....for "+str(filename))
+    data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
+    print("State transition matrix generated successfully\n")
+
+    # Observation : creating observation matrix
+    print("\nObservation table calculation .....for " + str(filename))
+    df3 = pd.read_csv(obs_path + str(filename)).dropna()
+    df4 = df3[:24]
 
     original = df4["reply_count"] * df4["tweet_count"] * df4["quote_count"]
     spreader = df4["mention_count"] * df4["retweet_count"]
@@ -109,8 +112,6 @@ for filename in files:
     for i in st_arr:
         if i in OBS:
             obs_arr.append(OBS.index(i))
-    # print(state_arr)
-    # print(obs_arr[:18])
 
     emm_dict = {}
     for i in range(len(state_arr) - 1):
@@ -119,8 +120,8 @@ for filename in files:
             emm_dict[s] += 1
         else:
             emm_dict[s] = 1
-    # print(emm_dict)
-    print("state observation transition matrix for   "+str(filename))
+
+    print("state observation transition matrix for   " + str(filename))
     e = np.zeros((27, 64))
     for key in emm_dict.keys():
         e[key] = emm_dict[key]
@@ -130,12 +131,13 @@ for filename in files:
         for j in range(64):
             e[i, j] = (e[i, j] + 1)
             e[i, j] = e[i, j] / s
-    #    print(e[i].sum())
-    obs_matrix=e
+    obs_matrix = e
 
-    data2=pd.DataFrame(data=obs_matrix)
-    data2.to_csv("F://hmm-master//hmm-master//output//observation//"+str(filename)+"_observation.csv")
+    data2 = pd.DataFrame(data=obs_matrix)
+    data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
     print("Observation matrix generated.\n")
+
+    # Final Seq : final seq for hmm model
     print("Ready for HMM model.....")
     model = hmm.MultinomialHMM(n_components=27)
     model.startprob_ = np.ones(27) / 27
@@ -147,7 +149,5 @@ for filename in files:
     print("math.exp(logprob) = ", math.exp(logprob))
     print("seq = ", seq)
     df5 = pd.DataFrame(data=seq)
-    df5.to_csv("F://hmm-master//hmm-master//output//final_seq//"+str(filename)+"_final_seq.csv")
+    df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
     print(f"{filename} final sequence csv created.")
-
-
