@@ -60,18 +60,12 @@ for filename in files:
     for key in trans_dict.keys():
         a[key] = trans_dict[key]
 
-    for i in range(27):
-        s = sum(a[i]) + 27
-        for j in range(27):
-            a[i, j] = (a[i, j] + 1)
-            a[i, j] = a[i, j] / s
-
     state_matrix = a
     data = pd.DataFrame(data=state_matrix)
     data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
     print("State transition matrix generated successfully\n")
 
-    # Observation : creating observation matrix
+    # -----: Observation :-----
     print("\nObservation table calculation .....for " + str(filename))
     df3 = pd.read_csv(obs_path + str(filename)).dropna()
     df4 = df3[:24]
@@ -108,6 +102,7 @@ for filename in files:
     for i in range(len(original_state)):
         s = f"{original_state[i]}{spreader_state[i]}{reputed_state[i]}"
         st_arr.append(s)
+
     obs_arr = []
     for i in st_arr:
         if i in OBS:
@@ -126,28 +121,22 @@ for filename in files:
     for key in emm_dict.keys():
         e[key] = emm_dict[key]
 
-    for i in range(27):
-        s = sum(e[i]) + 64
-        for j in range(64):
-            e[i, j] = (e[i, j] + 1)
-            e[i, j] = e[i, j] / s
     obs_matrix = e
-
     data2 = pd.DataFrame(data=obs_matrix)
     data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
     print("Observation matrix generated.\n")
 
     # Final Seq : final seq for hmm model
-    print("Ready for HMM model.....")
-    model = hmm.MultinomialHMM(n_components=27)
-    model.startprob_ = np.ones(27) / 27
-    model.transmat_ = state_matrix
-    model.emissionprob_ = obs_matrix
-
-    logprob, seq = model.decode(np.array([obs_arr[18:]]).transpose())
-
-    print("math.exp(logprob) = ", math.exp(logprob))
-    print("seq = ", seq)
-    df5 = pd.DataFrame(data=seq)
-    df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
-    print(f"{filename} final sequence csv created.")
+    # print("Ready for HMM model.....")
+    # model = hmm.MultinomialHMM(n_components=27)
+    # model.startprob_ = np.ones(27) / 27
+    # model.transmat_ = state_matrix
+    # model.emissionprob_ = obs_matrix
+    #
+    # logprob, seq = model.decode(np.array([obs_arr[18:]]).transpose())
+    #
+    # print("math.exp(logprob) = ", math.exp(logprob))
+    # print("seq = ", seq)
+    # df5 = pd.DataFrame(data=seq)
+    # df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
+    # print(f"{filename} final sequence csv created.")
