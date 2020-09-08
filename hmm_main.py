@@ -14,6 +14,7 @@ state_path = "D://project//hmm//data//state//"
 output_path = "D://project//hmm//output//"
 
 for filename in files:
+    print(f"\n----------------: {filename.split('.')[0]} :---------------------")
     # -------------------: State :----------------------
     df2 = pd.read_csv(state_path + str(filename)).dropna()
 
@@ -22,18 +23,19 @@ for filename in files:
     print("\nState calculation.. for " + str(filename))
 
     data = pd.DataFrame(data=state_matrix_output)
-    data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
+    data.to_csv(output_path + "state//" + str(filename.split(".")[0]) + "_state.csv")
     print("State transition matrix generated successfully\n")
 
     # -----------: Observation :-----------------
-    print("\nObservation table calculation .....for " + str(filename))
+    print("Observation table calculation .....for " + str(filename))
     df3 = pd.read_csv(obs_path + str(filename)).dropna()
+
     df4 = df3[:round(len(df3) * 0.8)]
 
     obs_matrix_output = obs_matrix(df4)
 
     data2 = pd.DataFrame(data=obs_matrix_output)
-    data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
+    data2.to_csv(output_path + "observation//" + str(filename.split(".")[0]) + "_observation.csv")
     print("Observation matrix generated.\n")
 
     # ----: Final Seq :----
@@ -50,5 +52,6 @@ for filename in files:
     print("seq = ", seq)
 
     df5 = pd.DataFrame(data=seq)
-    df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
-    print(f"{filename} final sequence csv created.")
+    df5.to_csv(output_path + "final_seq//" + str(filename.split(".")[0]) + "_final_seq.csv")
+    print(f"\n{filename} final sequence csv created.")
+    print("\n-----------------------Done------------------------\n\n")
