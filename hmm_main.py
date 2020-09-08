@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from hmmlearn import hmm
 import math
-from utils import state_calculator, symbol_calculator
+from utils import state_calculator, symbol_calculator, adjust_state_matrix
 
 obs_path = "D://project//hmm//data//observation//"
 files = os.listdir(obs_path)
@@ -61,9 +61,9 @@ for filename in files:
         a[key] = trans_dict[key]
 
     state_matrix = a
-    data = pd.DataFrame(data=state_matrix)
-    data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
-    print("State transition matrix generated successfully\n")
+    # data = pd.DataFrame(data=state_matrix)
+    # data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
+    # print("State transition matrix generated successfully\n")
 
     # -----: Observation :-----
     print("\nObservation table calculation .....for " + str(filename))
@@ -122,21 +122,23 @@ for filename in files:
         e[key] = emm_dict[key]
 
     obs_matrix = e
-    data2 = pd.DataFrame(data=obs_matrix)
-    data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
-    print("Observation matrix generated.\n")
+    # data2 = pd.DataFrame(data=obs_matrix)
+    # data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
+    # print("Observation matrix generated.\n")
+
+    adjusted_state_matrix = adjust_state_matrix(state_matrix)
 
     # Final Seq : final seq for hmm model
-    # print("Ready for HMM model.....")
-    # model = hmm.MultinomialHMM(n_components=27)
-    # model.startprob_ = np.ones(27) / 27
-    # model.transmat_ = state_matrix
-    # model.emissionprob_ = obs_matrix
-    #
-    # logprob, seq = model.decode(np.array([obs_arr[18:]]).transpose())
-    #
-    # print("math.exp(logprob) = ", math.exp(logprob))
-    # print("seq = ", seq)
+    print("Ready for HMM model.....")
+    model = hmm.MultinomialHMM(n_components=27)
+    model.startprob_ = np.ones(27) / 27
+    model.transmat_ = adjusted_state_matrix
+    model.emissionprob_ = obs_matrix
+
+    logprob, seq = model.decode(obs_matrix.transpose())
+
+    print("math.exp(logprob) = ", math.exp(logprob))
+    print("seq = ", seq)
     # df5 = pd.DataFrame(data=seq)
     # df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
     # print(f"{filename} final sequence csv created.")
