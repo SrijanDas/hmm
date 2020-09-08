@@ -16,8 +16,8 @@ output_path = "D://project//hmm//output//"
 for filename in files:
     # -------------------: State :----------------------
     df2 = pd.read_csv(state_path + str(filename)).dropna()
-    df = df2[:18]
 
+    df = df2[:round(len(df2) * 0.8)]
     state_matrix_output = state_matrix(df)
     print("\nState calculation.. for " + str(filename))
 
@@ -28,7 +28,7 @@ for filename in files:
     # -----------: Observation :-----------------
     print("\nObservation table calculation .....for " + str(filename))
     df3 = pd.read_csv(obs_path + str(filename)).dropna()
-    df4 = df3[:24]
+    df4 = df3[:round(len(df3) * 0.8)]
 
     obs_matrix_output = obs_matrix(df4)
 
@@ -43,10 +43,12 @@ for filename in files:
     model.transmat_ = state_matrix_output
     model.emissionprob_ = obs_matrix_output
 
-    logprob, seq = model.decode(np.array([obs_arr[18:]]).transpose())
+    test_split = int(len(obs_arr) * 0.2)
+    logprob, seq = model.decode(np.array([obs_arr[test_split:]]).transpose())
 
     print("math.exp(logprob) = ", math.exp(logprob))
     print("seq = ", seq)
+
     df5 = pd.DataFrame(data=seq)
     df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
     print(f"{filename} final sequence csv created.")
