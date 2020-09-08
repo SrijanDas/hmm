@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 from hmmlearn import hmm
 import math
-from utils import state_calculator, symbol_calculator, adjust_state_matrix
+from utils import state_calculator, symbol_calculator
+from state import state_matrix
+from obs import obs_matrix, obs_arr
 
 obs_path = "D://project//hmm//data//observation//"
 files = os.listdir(obs_path)
@@ -12,133 +14,39 @@ state_path = "D://project//hmm//data//state//"
 output_path = "D://project//hmm//output//"
 
 for filename in files:
-    # State : creating state transition matrix
+    # -------------------: State :----------------------
     df2 = pd.read_csv(state_path + str(filename)).dropna()
     df = df2[:18]
 
+    state_matrix_output = state_matrix(df)
     print("\nState calculation.. for " + str(filename))
-    LIKE_LOW_RANGE = 100
-    LIKE_MID_RANGE = 1000
 
-    RETWEET_LOW_RANGE = 0.75
-    RETWEET_MID_RANGE = 1.75
+    data = pd.DataFrame(data=state_matrix_output)
+    data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
+    print("State transition matrix generated successfully\n")
 
-    TWEET_LOW_RANGE = 0.7
-    TWEET_MID_RANGE = 1.25
-
-    like = df["sd_like"]
-    retweet = df["sd_retweet"]
-    tweet = df["sd_tweet"]
-
-    like_state = state_calculator(like, LIKE_LOW_RANGE, LIKE_MID_RANGE)
-    retweet_state = state_calculator(retweet, RETWEET_LOW_RANGE, RETWEET_MID_RANGE)
-    tweet_state = state_calculator(tweet, TWEET_LOW_RANGE, TWEET_MID_RANGE)
-
-    STATE = ['LLL', 'LLM', 'LLH', 'LML', 'LMM', 'LMH', 'LHL', 'LHM', 'LHH', 'MLL',
-             'MLM', 'MLH', 'MML', 'MMM', 'MMH', 'MHL', 'MHM', 'MHH', 'HLL',
-             'HLM', 'HLH', 'HML', 'HMM', 'HMH', 'HHL', 'HHM', 'HHH']
-    print("Generating state transition  matrix... for " + str(filename))
-    comparison_arr = []
-    for i in range(0, len(like_state)):
-        s = f"{like_state[i]}{retweet_state[i]}{tweet_state[i]}"
-        comparison_arr.append(s)
-
-    state_arr = []
-    for i in comparison_arr:
-        if i in STATE:
-            state_arr.append(STATE.index(i))
-
-    trans_dict = {}
-    for i in range(len(state_arr) - 1):
-        s = state_arr[i], state_arr[i + 1]
-        if s in trans_dict:
-            trans_dict[s] += 1
-        else:
-            trans_dict[s] = 1
-
-    a = np.zeros((27, 27))
-    for key in trans_dict.keys():
-        a[key] = trans_dict[key]
-
-    state_matrix = a
-    # data = pd.DataFrame(data=state_matrix)
-    # data.to_csv(output_path + "state//" + str(filename) + "_state.csv")
-    # print("State transition matrix generated successfully\n")
-
-    # -----: Observation :-----
+    # -----------: Observation :-----------------
     print("\nObservation table calculation .....for " + str(filename))
     df3 = pd.read_csv(obs_path + str(filename)).dropna()
     df4 = df3[:24]
 
-    original = df4["reply_count"] * df4["tweet_count"] * df4["quote_count"]
-    spreader = df4["mention_count"] * df4["retweet_count"]
-    reputed = df4["Fav_count"] * df4["retweet_by_other_count"]
+    obs_matrix_output = obs_matrix(df4)
 
-    original_a = 50
-    original_b = 500
-    original_c = 5000
+    data2 = pd.DataFrame(data=obs_matrix_output)
+    data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
+    print("Observation matrix generated.\n")
 
-    spreader_a = 12
-    spreader_b = 45
-    spreader_c = 150
-
-    reputed_a = 100000
-    reputed_b = 7000000
-    reputed_c = 500000000
-
-    original_state = symbol_calculator(original, original_a, original_b, original_c)
-    spreader_state = symbol_calculator(spreader, spreader_a, spreader_b, spreader_c)
-    reputed_state = symbol_calculator(reputed, reputed_a, reputed_b, reputed_c)
-
-    OBS = ["AAA", "AAB", "AAC", "AAD", "ABA", "ABB", "ABC", "ABD", "ACA", "ACB", "ACC", "ACD", "ADA", "ADB", "ADC",
-           "ADD",
-           "BAA", "BAB", "BAC", "BAD", "BBA", "BBB", "BBC", "BBD", "BCA", "BCB", "BCC", "BCD", "BDA", "BDB", "BDC",
-           "BDD",
-           "CAA", "CAB", "CAC", "CAD", "CBA", "CBB", "CBC", "CBD", "CCA", "CCB", "CCC", "CCD", "CDA", "CDB", "CDC",
-           "CDD",
-           "DAA", "DAB", "DAC", "DAD", "DBA", "DBB", "DBC", "DBD", "DCA", "DCB", "DCC", "DCD", "DDA", "DDB", "DDC",
-           "DDD"]
-    st_arr = []
-    for i in range(len(original_state)):
-        s = f"{original_state[i]}{spreader_state[i]}{reputed_state[i]}"
-        st_arr.append(s)
-
-    obs_arr = []
-    for i in st_arr:
-        if i in OBS:
-            obs_arr.append(OBS.index(i))
-
-    emm_dict = {}
-    for i in range(len(state_arr) - 1):
-        s = state_arr[i], obs_arr[i]
-        if s in emm_dict:
-            emm_dict[s] += 1
-        else:
-            emm_dict[s] = 1
-
-    print("state observation transition matrix for   " + str(filename))
-    e = np.zeros((27, 64))
-    for key in emm_dict.keys():
-        e[key] = emm_dict[key]
-
-    obs_matrix = e
-    # data2 = pd.DataFrame(data=obs_matrix)
-    # data2.to_csv(output_path + "observation//" + str(filename) + "_observation.csv")
-    # print("Observation matrix generated.\n")
-
-    adjusted_state_matrix = adjust_state_matrix(state_matrix)
-
-    # Final Seq : final seq for hmm model
+    # ----: Final Seq :----
     print("Ready for HMM model.....")
     model = hmm.MultinomialHMM(n_components=27)
     model.startprob_ = np.ones(27) / 27
-    model.transmat_ = adjusted_state_matrix
-    model.emissionprob_ = obs_matrix
+    model.transmat_ = state_matrix_output
+    model.emissionprob_ = obs_matrix_output
 
-    logprob, seq = model.decode(obs_matrix.transpose())
+    logprob, seq = model.decode(np.array([obs_arr[18:]]).transpose())
 
     print("math.exp(logprob) = ", math.exp(logprob))
     print("seq = ", seq)
-    # df5 = pd.DataFrame(data=seq)
-    # df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
-    # print(f"{filename} final sequence csv created.")
+    df5 = pd.DataFrame(data=seq)
+    df5.to_csv(output_path + "final_seq//" + str(filename) + "_final_seq.csv")
+    print(f"{filename} final sequence csv created.")
