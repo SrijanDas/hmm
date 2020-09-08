@@ -14,7 +14,7 @@ state_path = "D://project//hmm//data//state//"
 output_path = "D://project//hmm//output//"
 
 for filename in files:
-    print(f"\n----------------: {filename} :---------------------")
+    print(f"\n----------------: {filename.split('.')[0]} :---------------------")
     # -------------------: State :----------------------
     df2 = pd.read_csv(state_path + str(filename)).dropna()
 
